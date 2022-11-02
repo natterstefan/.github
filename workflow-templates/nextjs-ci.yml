@@ -1,0 +1,63 @@
+name: Next.js CI
+
+on:
+  # Allow to trigger the workflow manually again via the GitHub UI
+  # @see https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_call
+  workflow_call:
+  # Allow to trigger the workflow manually via the GitHub UI and also allow to
+  # select a custom branch
+  # @see https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_dispatch
+  workflow_dispatch:
+  # Trigger the workflow when a pull_request's activity type is opened,
+  # synchronize, or reopened.
+  # @see https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+  # Trigger the workflow when a pull request review is submitted (approved and
+  # other states)
+  # @see https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request_review
+  pull_request_review:
+    types:
+      - submitted
+  # Trigger the workflow on push
+  # @see https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#push
+  push:
+    branches:
+      - $default-branch
+  # Runs "At 17:00 every day." (see https://crontab.guru/#0_17_*_*_*)
+  # @see https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+  schedule:
+    - cron: "0 3 * * *"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: "yarn"
+
+      - uses: bahmutov/npm-install@1a235c31658a322a3b024444759650ee6345c26d
+        with:
+          install-command: yarn --prefer-offline --frozen-lockfile --no-progress --silent
+
+      - name: Load .env file
+        uses: natterstefan/action-next-env@v1
+        with:
+          environment: production
+
+      - run: yarn build
+      - run: yarn lint
+      - run: yarn test

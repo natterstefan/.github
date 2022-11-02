@@ -1,0 +1,6 @@
+{
+  "name": "Next.js CI",
+  "description": "Builds the app, lints the code and runs tests.",
+  "categories": [],
+  "filePatterns": ["next.config.(j|t)s"]
+}
