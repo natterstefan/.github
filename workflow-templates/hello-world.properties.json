@@ -1,0 +1,11 @@
+{
+  "name": "Hello World",
+  "description": "A Hello World Workflow",
+  "categories": [
+      "JavaScript",
+      "TypeScript"
+  ],
+  "filePatterns": [
+      "package.json$"
+  ]
+}
